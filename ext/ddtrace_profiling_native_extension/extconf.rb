@@ -21,6 +21,14 @@ end
 # that may fail on an environment not properly setup for building Ruby extensions.
 require 'mkmf'
 
+# TODO: Should not be hardcoded for my machine
+dir_config("libddprof", "/app/libddprof/ffi-artifacts/include", "/app/libddprof/ffi-artifacts/lib")
+
+find_header("ddprof/ffi.h") || raise('Header not found')
+find_library("pthread", nil)
+find_library("dl", nil)
+find_library("ddprof_ffi", "ddprof_ffi_Exporter_new") || raise('libddprof_ffi not found')
+
 # Tag the native extension library with the Ruby version and Ruby platform.
 # This makes it easier for development (avoids "oops I forgot to rebuild when I switched my Ruby") and ensures that
 # the wrong library is never loaded.

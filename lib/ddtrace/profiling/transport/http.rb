@@ -39,7 +39,8 @@ module Datadog
                 transport,
                 profiling_upload_timeout_seconds: profiling_upload_timeout_seconds,
                 site: site,
-                api_key: api_key
+                api_key: api_key,
+                agent_settings: agent_settings,
               )
             else
               configure_for_agent(
@@ -88,7 +89,7 @@ module Datadog
           end
         end
 
-        private_class_method def self.configure_for_agentless(transport, profiling_upload_timeout_seconds:, site:, api_key:)
+        private_class_method def self.configure_for_agentless(transport, profiling_upload_timeout_seconds:, site:, api_key:, agent_settings:)
           apis = API.api_defaults
 
           site_uri = URI(format(Datadog::Ext::Profiling::Transport::HTTP::URI_TEMPLATE_DD_API, site))
@@ -104,6 +105,10 @@ module Datadog
           )
           transport.api(API::V1, apis[API::V1], default: true)
           transport.headers(Datadog::Ext::Transport::HTTP::HEADER_DD_API_KEY => api_key)
+
+          if agent_settings.deprecated_for_removal_transport_configuration_proc
+            agent_settings.deprecated_for_removal_transport_configuration_proc.call(transport)
+          end
         end
 
         private_class_method def self.agentless_allowed?
