@@ -700,47 +700,47 @@ workflows:
 
       # Integration
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.1']
               app: ['rack']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.2']
               app: ['rack']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.3']
               app: ['rack', 'rails-five']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.4']
               app: ['rack', 'rails-five']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.5']
               app: ['rack', 'rails-five', 'rails-six']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.6']
               app: ['rack', 'rails-five', 'rails-six', 'sinatra2-classic', 'sinatra2-modular']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.7']
               app: ['rack', rails-five, 'rails-six', 'rails-seven', 'sinatra2-classic', 'sinatra2-modular']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['3.0']
               app: ['rack', 'rails-six', 'rails-seven', 'sinatra2-classic', 'sinatra2-modular']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['3.1']
               app: ['rack', 'rails-six', 'rails-seven', 'sinatra2-classic', 'sinatra2-modular']
@@ -923,47 +923,47 @@ workflows:
       #       - build-truffleruby-21.0.0
             # Integration
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.1']
               app: ['rack']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.2']
               app: ['rack']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.3']
               app: ['rack', 'rails-five']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.4']
               app: ['rack', 'rails-five']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.5']
               app: ['rack', 'rails-five', 'rails-six']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.6']
               app: ['rack', 'rails-five', 'rails-six', 'sinatra2-classic', 'sinatra2-modular']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['2.7']
               app: ['rack', rails-five, 'rails-six', 'rails-seven', 'sinatra2-classic', 'sinatra2-modular']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['3.0']
               app: ['rack', 'rails-six', 'rails-seven', 'sinatra2-classic', 'sinatra2-modular']
       - orb/build_and_integration_test:
-        matrix:
+          matrix:
             parameters:
               ruby_version: ['3.1']
               app: ['rack', 'rails-six', 'rails-seven', 'sinatra2-classic', 'sinatra2-modular']
