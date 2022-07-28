@@ -221,14 +221,12 @@ orbs:
               key: bundle-{{ .Environment.CIRCLE_CACHE_VERSION }}-<<parameters.ruby_version>>-{{ checksum "lib/ddtrace/version.rb" }}-{{ .Branch }}-{{ checksum ".circleci/bundle_checksum" }}
               paths:
                 - /usr/local/bundle
-      build_and_test_integration:
+      build_and_integration_test:
         executor: docker-integration
         parameters:
           ruby_version:
-            description: Ruby version
             type: string
-          integration_apps:
-            description: Integration apps
+          app:
             type: string
         steps:
           - checkout
@@ -236,20 +234,14 @@ orbs:
               docker_layer_caching: true
               version: 20.10.6
           - run:
-              name: Build integration base images
+              name: Build integration base image
               command: ./integration/script/build-images -v <<parameters.ruby_version>>
           - run:
-              name: Build integration app images
-              command: |
-                for i in <<parameters.integration_apps>>; do
-                  ./integration/apps/$i/script/build-images -v <<parameters.ruby_version>>
-                done
+              name: Build integration app image
+              command: ./integration/apps/<<parameters.app>>/script/build-images -v <<parameters.ruby_version>>
           - run:
-              name: Test integration apps
-              command: |
-                for i in <<parameters.integration_apps>>; do
-                  ./integration/apps/$i/script/ci -v <<parameters.ruby_version>>
-                done
+              name: Test integration app
+              command: ./integration/apps/<<parameters.app>>/script/ci -v <<parameters.ruby_version>>
       test:
         <<: *test_job_default
         docker:
@@ -583,59 +575,6 @@ workflows:
           filters:
             branches:
               only: /bump_to_version_.*/
-      # Integration
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.1
-          integration_apps: 'rack'
-          ruby_version: '2.1'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.2
-          integration_apps: 'rack'
-          ruby_version: '2.2'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.3
-          integration_apps: 'rack rails-five'
-          ruby_version: '2.3'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.4
-          integration_apps: 'rack rails-five'
-          ruby_version: '2.4'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.5
-          integration_apps: 'rack rails-five rails-six'
-          ruby_version: '2.5'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.6
-          integration_apps: 'rack rails-five rails-six sinatra2-classic sinatra2-modular'
-          ruby_version: '2.6'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.7
-          integration_apps: 'rack rails-five rails-six rails-seven sinatra2-classic sinatra2-modular'
-          ruby_version: '2.7'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-3.0
-          integration_apps: 'rack rails-six rails-seven sinatra2-classic sinatra2-modular'
-          ruby_version: '3.0'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-3.1
-          integration_apps: 'rack rails-six rails-seven sinatra2-classic sinatra2-modular'
-          ruby_version: '3.1'
-          <<: *filters_all_branches_and_tags
-      # TODO: Re-enable once 3.2 testing is green!
-      # - orb/build_and_test_integration:
-      #     name: build_and_test_integration-3.2
-      #     integration_apps: 'rack rails-six rails-seven'
-      #     ruby_version: '3.2'
-      #     <<: *filters_all_branches_and_tags
-      # ADD NEW RUBIES HERE
       # MRI
       - orb/build:
           <<: *config-2_1
@@ -758,6 +697,53 @@ workflows:
       #     name: test-truffleruby-21.0.0
       #     requires:
       #       - build-truffleruby-21.0.0
+
+      # Integration
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.1']
+              app: ['rack']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.2']
+              app: ['rack']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.3']
+              app: ['rack', 'rails-five']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.4']
+              app: ['rack', 'rails-five']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.5']
+              app: ['rack', 'rails-five', 'rails-six']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.6']
+              app: ['rack', 'rails-five', 'rails-six', 'sinatra2-classic', 'sinatra2-modular']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.7']
+              app: ['rack', rails-five, 'rails-six', 'rails-seven', 'sinatra2-classic', 'sinatra2-modular']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['3.0']
+              app: ['rack', 'rails-six', 'rails-seven', 'sinatra2-classic', 'sinatra2-modular']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['3.1']
+              app: ['rack', 'rails-six', 'rails-seven', 'sinatra2-classic', 'sinatra2-modular']
       # Release jobs
       - "deploy prerelease Gem":
           <<: *filters_all_branches_and_tags
@@ -813,59 +799,6 @@ workflows:
               only:
                 - master
     jobs:
-      # Integration
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.1
-          integration_apps: 'rack'
-          ruby_version: '2.1'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.2
-          integration_apps: 'rack'
-          ruby_version: '2.2'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.3
-          integration_apps: 'rack rails-five'
-          ruby_version: '2.3'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.4
-          integration_apps: 'rack rails-five'
-          ruby_version: '2.4'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.5
-          integration_apps: 'rack rails-five rails-six'
-          ruby_version: '2.5'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.6
-          integration_apps: 'rack rails-five rails-six'
-          ruby_version: '2.6'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-2.7
-          integration_apps: 'rack rails-five rails-six rails-seven'
-          ruby_version: '2.7'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-3.0
-          integration_apps: 'rack rails-six rails-seven'
-          ruby_version: '3.0'
-          <<: *filters_all_branches_and_tags
-      - orb/build_and_test_integration:
-          name: build_and_test_integration-3.1
-          integration_apps: 'rack rails-six rails-seven'
-          ruby_version: '3.1'
-          <<: *filters_all_branches_and_tags
-      # TODO: Re-enable once 3.2 testing is green!
-      # - orb/build_and_test_integration:
-      #     name: build_and_test_integration-3.2
-      #     integration_apps: 'rack rails-six rails-seven'
-      #     ruby_version: '3.2'
-      #     <<: *filters_all_branches_and_tags
-      # ADD NEW RUBIES HERE
       # MRI
       - orb/build:
           <<: *config-2_1
@@ -988,3 +921,49 @@ workflows:
       #     name: test-truffleruby-21.0.0
       #     requires:
       #       - build-truffleruby-21.0.0
+            # Integration
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.1']
+              app: ['rack']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.2']
+              app: ['rack']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.3']
+              app: ['rack', 'rails-five']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.4']
+              app: ['rack', 'rails-five']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.5']
+              app: ['rack', 'rails-five', 'rails-six']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.6']
+              app: ['rack', 'rails-five', 'rails-six', 'sinatra2-classic', 'sinatra2-modular']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['2.7']
+              app: ['rack', rails-five, 'rails-six', 'rails-seven', 'sinatra2-classic', 'sinatra2-modular']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['3.0']
+              app: ['rack', 'rails-six', 'rails-seven', 'sinatra2-classic', 'sinatra2-modular']
+      - orb/build_and_integration_test:
+        matrix:
+            parameters:
+              ruby_version: ['3.1']
+              app: ['rack', 'rails-six', 'rails-seven', 'sinatra2-classic', 'sinatra2-modular']
