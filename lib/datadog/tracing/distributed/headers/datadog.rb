@@ -20,6 +20,16 @@ module Datadog
             env[HTTP_HEADER_SAMPLING_PRIORITY] = digest.trace_sampling_priority.to_s if digest.trace_sampling_priority
             env[HTTP_HEADER_ORIGIN] = digest.trace_origin.to_s unless digest.trace_origin.nil?
 
+            begin
+              env[HTTP_HEADER_TAGS] = DatadogTagsCodec.encode(digest.trace_distributed_tags) unless digest.trace_distributed_tags.nil?
+            rescue => e
+              Tracing.active_trace.set_tag("_dd.propagation_error", "inject_max_size")
+              Datadog.logger.warn("Failed to propagate x-datadog-tags: tags are too large")
+            rescue => e
+              Tracing.active_trace.set_tag("_dd.propagation_error", "encoding_error")
+              Datadog.logger.warn("Failed to encode x-datadog-tags: error encoding tags")
+            end
+
             env
           end
 
@@ -37,12 +47,23 @@ module Datadog
             # DEV: `Parser#id` will not return 0
             return unless (trace_id && parent_id) || (origin && trace_id)
 
+            begin
+              trace_distributed_tags = DatadogTagsCodec.decode(headers.header(HTTP_HEADER_TAGS))
+            rescue => e
+              Tracing.active_trace.set_tag("_dd.propagation_error", "extract_max_size")
+              Datadog.logger.warn("failed to decode x-datadog-tags")
+            rescue => e
+              Tracing.active_trace.set_tag("_dd.propagation_error", "decoding_error")
+              Datadog.logger.debug("failed to decode x-datadog-tags #{headers.header(HTTP_HEADER_TAGS)}")
+            end
+
             # Return new trace headers
             TraceDigest.new(
               span_id: parent_id,
               trace_id: trace_id,
               trace_origin: origin,
-              trace_sampling_priority: sampling_priority
+              trace_sampling_priority: sampling_priority,
+              trace_distributed_tags: trace_distributed_tags,
             )
           end
         end

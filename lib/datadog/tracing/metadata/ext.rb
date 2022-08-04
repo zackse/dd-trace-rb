@@ -45,6 +45,7 @@ module Datadog
         # @public_api
         # Tags related to distributed tracing
         module Distributed
+          # TAG_DECISION_MAKER = '_dd.p.dm'
           TAG_ORIGIN = '_dd.origin'
           TAG_SAMPLING_PRIORITY = '_sampling_priority_v1'
         end
