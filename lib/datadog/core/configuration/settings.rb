@@ -608,6 +608,16 @@ module Datadog
           # @default `{}`
           # @return [Hash,nil]
           option :writer_options, default: ->(_i) { {} }, lazy: true
+
+          # Maximum size for the `x-datadog-tags` distributed trace header value injected
+          # into outgoing HTTP requests.
+          #
+          # @default `DD_TRACE_X_DATADOG_TAGS_MAX_LENGTH` environment variable, otherwise `512`
+          # @return [Integer]
+          option :x_datadog_tags_max_length do |o|
+            o.default { env_to_int(Tracing::Configuration::Ext::Distributed::ENV_X_DATADOG_TAGS_MAX_LENGTH, 512) }
+            o.lazy
+          end
         end
 
         # The `version` tag in Datadog. Use it to enable [Deployment Tracking](https://docs.datadoghq.com/tracing/deployment_tracking/).

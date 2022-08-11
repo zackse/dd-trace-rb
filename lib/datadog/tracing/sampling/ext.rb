@@ -28,7 +28,7 @@ module Datadog
           # The sampling rate received in the agent's http response.
           AGENT_RATE = 1
           # Auto. Reserved for future use.
-          REMOTE_RATE = 2
+          REMOTE_RATE_AUTO = 2
           # Sampling rule or sampling rate based on tracer config.
           TRACE_SAMPLING_RULE = 3
           # User directly sets sampling priority via {Tracing.reject!} or {Tracing.keep!}.
@@ -36,7 +36,7 @@ module Datadog
           # Formerly AppSec.
           ASM = 5
           # User-defined target. Reserved for future use.
-          REMOTE_RATE = 6
+          REMOTE_RATE_USER = 6
           # Emergency.
           REMOTE_RATE_BY_DATADOG = 7
           # Single Span Sampled.
